@@ -3,28 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index of Files</title>
+    <title>Index of WebsiteAssets</title>
 </head>
 <body>
-    <h1>Index of Files</h1>
+    <h1>Index of WebsiteAssets</h1>
     <ul id="file-list"></ul>
 
     <script>
-        async function listFiles() {
-            const repo = "JulerGaming/julergt.org-Files/"; // Replace with your repo details
-            const branch = "main"; // Change if using another branch
-            const apiUrl = `https://api.github.com/repos/${repo}/contents/`;
+        const repo = "JulerGaming/julergt.org-Files"; // Your repo
+        const branch = "main"; // Change if using another branch
+        const baseApiUrl = `https://api.github.com/repos/${repo}/contents/`;
 
+        async function listFiles(path = "") {
+            const apiUrl = baseApiUrl + path;
             try {
                 const response = await fetch(apiUrl);
                 const files = await response.json();
 
                 const fileList = document.getElementById("file-list");
+                fileList.innerHTML = ""; // Clear previous list
+
+                if (path) {
+                    // "Back" link for subdirectories
+                    const backLi = document.createElement("li");
+                    const backLink = document.createElement("a");
+                    backLink.href = "#";
+                    backLink.textContent = "[Back]";
+                    backLink.onclick = () => {
+                        const parentPath = path.split("/").slice(0, -1).join("/");
+                        listFiles(parentPath);
+                    };
+                    backLi.appendChild(backLink);
+                    fileList.appendChild(backLi);
+                }
+
                 files.forEach(file => {
                     const li = document.createElement("li");
                     const a = document.createElement("a");
-                    a.href = file.download_url;
                     a.textContent = file.name;
+
+                    if (file.type === "dir") {
+                        a.href = "#";
+                        a.onclick = () => listFiles(file.path);
+                    } else {
+                        a.href = file.download_url;
+                        a.target = "_blank"; // Open files in a new tab
+                    }
+
                     li.appendChild(a);
                     fileList.appendChild(li);
                 });
@@ -33,7 +58,7 @@
             }
         }
 
-        listFiles();
+        listFiles(); // Load root directory
     </script>
 </body>
 </html>
