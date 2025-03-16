@@ -3,16 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index of WebsiteAssets</title>
+    <title>Index of /</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            font-size: 1.5em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            text-align: left;
+            background-color: #f4f4f4;
+        }
+        td a {
+            text-decoration: none;
+            color: blue;
+        }
+        td a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Index of WebsiteAssets</h1>
-    <ul id="file-list"></ul>
+    <h1>Index of <span id="current-path">/</span></h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Last Modified</th>
+            </tr>
+        </thead>
+        <tbody id="file-list">
+        </tbody>
+    </table>
 
     <script>
         const repo = "JulerGaming/julergt.org-Files"; // Your repo
-        const branch = "main"; // Change if using another branch
+        const branch = "main"; // Change if needed
         const baseApiUrl = `https://api.github.com/repos/${repo}/contents/`;
+        const fileListElement = document.getElementById("file-list");
+        const pathElement = document.getElementById("current-path");
 
         async function listFiles(path = "") {
             const apiUrl = baseApiUrl + path;
@@ -20,42 +60,49 @@
                 const response = await fetch(apiUrl);
                 const files = await response.json();
 
-                const fileList = document.getElementById("file-list");
-                fileList.innerHTML = ""; // Clear previous list
+                fileListElement.innerHTML = ""; // Clear list
+                pathElement.textContent = path ? `/${path}/` : "/";
 
                 if (path) {
-                    // "Back" link for subdirectories
-                    const backLi = document.createElement("li");
-                    const backLink = document.createElement("a");
-                    backLink.href = "#";
-                    backLink.textContent = "[Back]";
-                    backLink.onclick = () => {
-                        const parentPath = path.split("/").slice(0, -1).join("/");
-                        listFiles(parentPath);
-                    };
-                    backLi.appendChild(backLink);
-                    fileList.appendChild(backLi);
+                    // "Parent Directory" link
+                    const parentPath = path.split("/").slice(0, -1).join("/");
+                    fileListElement.innerHTML += `
+                        <tr>
+                            <td><a href="#" onclick="listFiles('${parentPath}')">..</a></td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    `;
                 }
 
                 files.forEach(file => {
-                    const li = document.createElement("li");
-                    const a = document.createElement("a");
-                    a.textContent = file.name;
+                    const fileName = file.name;
+                    const fileSize = file.size ? formatSize(file.size) : "-";
+                    const lastModified = file.updated_at ? new Date(file.updated_at).toLocaleString() : "-";
 
+                    let fileLink = `<a href="${file.download_url}" target="_blank">${fileName}</a>`;
                     if (file.type === "dir") {
-                        a.href = "#";
-                        a.onclick = () => listFiles(file.path);
-                    } else {
-                        a.href = file.download_url;
-                        a.target = "_blank"; // Open files in a new tab
+                        fileLink = `<a href="#" onclick="listFiles('${file.path}')">${fileName}/</a>`;
                     }
 
-                    li.appendChild(a);
-                    fileList.appendChild(li);
+                    fileListElement.innerHTML += `
+                        <tr>
+                            <td>${fileLink}</td>
+                            <td>${fileSize}</td>
+                            <td>${lastModified}</td>
+                        </tr>
+                    `;
                 });
             } catch (error) {
                 console.error("Error fetching file list:", error);
             }
+        }
+
+        function formatSize(bytes) {
+            const sizes = ["B", "KB", "MB", "GB", "TB"];
+            if (bytes === 0) return "0 B";
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
         }
 
         listFiles(); // Load root directory
