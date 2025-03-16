@@ -76,6 +76,11 @@
                 }
 
                 files.forEach(file => {
+                    // Ignore index.html and CNAME
+                    if (file.name.toLowerCase() === "index.html" || file.name.toLowerCase() === "cname") {
+                        return;
+                    }
+
                     const fileName = file.name;
                     const fileSize = file.size ? formatSize(file.size) : "-";
                     const lastModified = file.updated_at ? new Date(file.updated_at).toLocaleString() : "-";
