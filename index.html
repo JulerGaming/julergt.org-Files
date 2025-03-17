@@ -50,6 +50,7 @@
     <script>
         const repo = "JulerGaming/julergt.org-Files"; // Your repo
         const branch = "main"; // Change if needed
+        const baseUrl = "https://files.julergt.org/"; // Your GitHub Pages URL
         const baseApiUrl = `https://api.github.com/repos/${repo}/contents/`;
         const fileListElement = document.getElementById("file-list");
         const pathElement = document.getElementById("current-path");
@@ -85,7 +86,7 @@
                     const fileSize = file.size ? formatSize(file.size) : "-";
                     const lastModified = file.updated_at ? new Date(file.updated_at).toLocaleString() : "-";
 
-                    let fileLink = `<a href="${file.download_url}" target="_blank">${fileName}</a>`;
+                    let fileLink = `<a href="${baseUrl + (path ? path + '/' : '') + fileName}" target="_blank">${fileName}</a>`;
                     if (file.type === "dir") {
                         fileLink = `<a href="#" onclick="listFiles('${file.path}')">${fileName}/</a>`;
                     }
