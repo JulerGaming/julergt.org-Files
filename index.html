@@ -69,7 +69,7 @@
                     const parentPath = path.split("/").slice(0, -1).join("/");
                     fileListElement.innerHTML += `
                         <tr>
-                            <td><a href="#" onclick="listFiles('${parentPath}')">..</a></td>
+                            <td><a href="#" onclick="listFiles('${parentPath}'); return false;">..</a></td>
                             <td>-</td>
                             <td>-</td>
                         </tr>
@@ -86,9 +86,9 @@
                     const fileSize = file.size ? formatSize(file.size) : "-";
                     const lastModified = file.updated_at ? new Date(file.updated_at).toLocaleString() : "-";
 
-                    let fileLink = `<a href="${baseUrl + (path ? path + '/' : '') + fileName}" target="_blank">${fileName}</a>`;
+                    let fileLink = `<a href="${baseUrl + (path ? path + '/' : '') + fileName}">${fileName}</a>`;
                     if (file.type === "dir") {
-                        fileLink = `<a href="#" onclick="listFiles('${file.path}')">${fileName}/</a>`;
+                        fileLink = `<a href="#" onclick="listFiles('${file.path}'); return false;">${fileName}/</a>`;
                     }
 
                     fileListElement.innerHTML += `
